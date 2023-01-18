@@ -1,145 +1,106 @@
 package com.boitdroid.birdapp.controller;
 
-import com.boitdroid.birdapp.data.models.Users;
-import com.boitdroid.birdapp.data.payload.request.ForgotPasswordRequest;
-import com.boitdroid.birdapp.data.payload.request.LoginRequest;
-import com.boitdroid.birdapp.data.payload.request.SignupRequest;
-import com.boitdroid.birdapp.data.payload.response.APIResponse;
-import com.boitdroid.birdapp.data.payload.response.JWTAuthResponse;
-import com.boitdroid.birdapp.data.payload.response.UsersResponse;
-import com.boitdroid.birdapp.exceptions.AppException;
-import com.boitdroid.birdapp.services.UsersService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.boitdroid.birdapp.model.user.User;
+import com.boitdroid.birdapp.payload.request.InfoRequest;
+import com.boitdroid.birdapp.payload.request.UserIdentityAvailability;
+import com.boitdroid.birdapp.payload.response.ApiResponse;
+import com.boitdroid.birdapp.payload.response.UserProfile;
+import com.boitdroid.birdapp.payload.response.UserSummary;
+import com.boitdroid.birdapp.security.CurrentUser;
+import com.boitdroid.birdapp.security.UserPrincipal;
+import com.boitdroid.birdapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users")
 public class UserController {
 
-    Logger logger = LoggerFactory.getLogger(UserController.class);
-
     @Autowired
-    UsersService usersService;
+    UserService userService;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<UserSummary> getCurrentUser(@CurrentUser UserPrincipal currentUser) {
+        UserSummary userSummary = userService.getCurrentUser(currentUser);
 
-    @Value("${app.jwtExpirationInMs}")
-    private int jwtExpirationInMs;
-
-    @PostMapping("/auth/signin")
-    public ResponseEntity<Object> accountLogin(@Valid @RequestBody LoginRequest loginRequest){
-
-        try{
-            return ResponseEntity.ok(new JWTAuthResponse(usersService.accountLogin(loginRequest),"Bearer",jwtExpirationInMs));
-        }catch (AppException e){
-            return ResponseEntity.ok(new APIResponse(Boolean.FALSE,e.getMessage()));
-        }
+        return new ResponseEntity(userSummary, HttpStatus.OK);
     }
 
-    @PostMapping("/auth/signup")
-    public ResponseEntity<Object> createAccount(@Valid @RequestBody SignupRequest signupRequest){
-        try{
-            usersService.createAccount(signupRequest);
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentContextPath().path("/api/users/{username}")
-                    .buildAndExpand(signupRequest.getUsername()).toUri();
-            return ResponseEntity.created(location).body(new APIResponse(true,"User registered successfully"));
-        }catch (AppException e){
-            return ResponseEntity.ok(new APIResponse(false,e.getMessage()));
-        }
+    @GetMapping("/checkUsernameAvailability")
+    public ResponseEntity<UserIdentityAvailability> checkUsernameAvailability(@RequestParam(value = "username") String username) {
+        UserIdentityAvailability userIdentityAvailability = userService.checkUsernameAvailability(username);
+
+        return new ResponseEntity(userIdentityAvailability, HttpStatus.OK);
     }
 
-    @PostMapping("/auth/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam("email") String email){
-        try{
-            Optional<Users> byEmail = usersService.findByEmail(email);
-
-            if (byEmail.isEmpty()){
-                return ResponseEntity.ok(new APIResponse(Boolean.FALSE,"There is no account with an email address"));
-            }else{
-                Users user = byEmail.get();
-                String genUUId = UUID.randomUUID().toString();
-                user.setResetToken(genUUId);
-
-                //save token
-                usersService.saveUser(user);
-
-                //Send user token via Email
-
-                return ResponseEntity.ok(new APIResponse(Boolean.TRUE,"We have sent a password reset token to " + user.getEmail()));
-            }
-        }catch (AppException e){
-            return ResponseEntity.ok(new APIResponse(Boolean.FALSE,e.getMessage()));
-        }
+    @GetMapping("/checkEmailAvailability")
+    public ResponseEntity<UserIdentityAvailability> checkEmailAvailability(@RequestParam(value = "email") String email) {
+        UserIdentityAvailability userIdentityAvailability = userService.checkEmailAvailability(email);
+        return new ResponseEntity(userIdentityAvailability, HttpStatus.OK);
     }
 
-    @PostMapping("/auth/reset")
-    public ResponseEntity<?> setNewPassword(@RequestParam("token") String token, @RequestBody ForgotPasswordRequest forgotPasswordRequest){
-        Optional<Users> user = usersService.findByResetToken(token);
+    @GetMapping("/{username}")
+    public ResponseEntity<UserProfile> getUserProfile(@PathVariable(value = "username") String username) {
+        UserProfile userProfile = userService.getUserProfile(username);
 
-        if (user.isEmpty()){
-            return ResponseEntity.ok(new APIResponse(Boolean.FALSE,"The password reset link is invalid."));
-        }else {
-            Users users = user.get();
-
-            users.setPassword(passwordEncoder.encode(forgotPasswordRequest.getPassword()));
-            users.setResetToken(null);
-
-            usersService.saveUser(users);
-
-            //Send user password reset confirmation email
-
-            return ResponseEntity.ok(new APIResponse(Boolean.TRUE,"Your password has been successfully reset."));
-        }
-
+        return new ResponseEntity(userProfile, HttpStatus.OK);
     }
 
-    @GetMapping("/users/ba/{username}")
-    public ResponseEntity<?> getUserByUsername(@PathVariable("username") String username){
-        Optional<Users> user = usersService.findByUsername(username);
-        if (user.isEmpty()){
-            return ResponseEntity.ok(new APIResponse(Boolean.FALSE,"No account with username provided"));
-        }else {
-            Users users = user.get();
-            return ResponseEntity.ok(new UsersResponse(Boolean.TRUE,"User with username available",users));
-        }
+    @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<User> addUser(@Valid @RequestBody User user) {
+        User newUser = userService.addUser(user);
+
+        return new ResponseEntity(newUser, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/user/{id}")
-    public ResponseEntity<Object> deleteUserById(@PathVariable("id") Long id){
-        try{
-            usersService.accountDelete(id);
-            return ResponseEntity.ok(new APIResponse(Boolean.TRUE, "Account with id: " + id + " deleted successfully"));
-        }catch (Exception e){
-            return ResponseEntity.ok(new APIResponse(Boolean.FALSE,e.getMessage()));
-        }
+    @PutMapping("/{username}")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User newUser,
+                                           @PathVariable(value = "username") String username, @CurrentUser UserPrincipal currentUser) {
+        User updatedUser = userService.updateUser(newUser, username, currentUser);
+
+        return new ResponseEntity(updatedUser, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN','ROLE_MODERATOR')")
-    @GetMapping("/users")
-    public ResponseEntity<Object> getAllUsers() {
-        try {
-            List<Users> users = usersService.allUsers();
-            logger.info("Admin fetching al users available");
-            return ResponseEntity.ok(new UsersResponse(Boolean.TRUE,"Users available",users));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new APIResponse(Boolean.FALSE,e.getMessage()));
-        }
+    @DeleteMapping("/{username}")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable(value = "username") String username,
+                                                  @CurrentUser UserPrincipal currentUser) {
+        ApiResponse apiResponse = userService.deleteUser(username, currentUser);
+
+        return new ResponseEntity(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/{username}/giveAdmin")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> giveAdmin(@PathVariable(name = "username") String username) {
+        ApiResponse apiResponse = userService.giveAdmin(username);
+
+        return new ResponseEntity(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/{username}/takeAdmin")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> takeAdmin(@PathVariable(name = "username") String username) {
+        ApiResponse apiResponse = userService.removeAdmin(username);
+
+        return new ResponseEntity(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/setOrUpdateInfo")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<UserProfile> setAddress(@CurrentUser UserPrincipal currentUser,
+                                                  @Valid @RequestBody InfoRequest infoRequest) {
+        UserProfile userProfile = userService.setOrUpdateInfo(currentUser, infoRequest);
+
+        return new ResponseEntity(userProfile, HttpStatus.OK);
     }
 
 }
-

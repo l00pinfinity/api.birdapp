@@ -1,5 +1,5 @@
-# UserBackend API
-REST API for authenticating users.
+# BirdApp API
+REST API for the TwitterClone
 
 # Initialize Database
 ```yaml
@@ -17,8 +17,15 @@ Below are the REST APIs for the example app.
 ### Request
 
 `POST /api/signup`
-    
-    curl --location --request POST 'http://localhost:8080/api/signup' \--header 'Content-Type: application/json' \--data-raw '{"username":"ckb","email":"collinskipkemboi001@gmail.com","password":"tyugbjhn"}'
+
+
+    curl --location --request POST 'http://localhost:5000/api/auth/signup' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "username":"l00pinfinity",
+        "email":"collinskipkemboi@gmail.com",
+        "password":"qwerty6"
+    }'
 
 ### Successful Response
 
@@ -32,15 +39,23 @@ Below are the REST APIs for the example app.
 1. Email already in use
 ```yaml
 {
-    "success": false,
-    "message": "Email is already in use"
+  "timestamp": "2023-01-18T09:22:19.190+00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "trace": "com.boitdroid.birdapp.exception.BadRequestException: It appears that the username you entered is already taken\r\n\tat com.boitdroid.birdapp.service.UserServiceImpl.addUser(UserServiceImpl.java:42)\r\n\tat com.boitdroid.birdapp.controller.AuthController.registerUser(AuthController.java:52)\r\n\tat java.base/jdk.internal.reflect",
+  "message": "It appears that the email you entered is already in use",
+  "path": "/api/auth/signup"
 }
 ```
 2. Username is already taken
 ```yaml
 {
-    "success": false,
-    "message": "Username is already taken"
+  "timestamp": "2023-01-18T09:22:19.190+00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "trace": "com.boitdroid.birdapp.exception.BadRequestException: It appears that the username you entered is already taken\r\n\tat com.boitdroid.birdapp.service.UserServiceImpl.addUser(UserServiceImpl.java:42)\r\n\tat com.boitdroid.birdapp.controller.AuthController.registerUser(AuthController.java:52)\r\n\tat java.base/jdk.internal.reflect",
+  "message": "It appears that the username you entered is already taken",
+  "path": "/api/auth/signup"
 }
 ```
 
@@ -51,65 +66,42 @@ Below are the REST APIs for the example app.
 
 `POST /api/signin`
 
-    curl --location --request POST 'http://localhost:8080/api/signin' \--header 'Content-Type: application/json' \--data-raw '{"usernameOrEmail":"ckb","password":"qwerty"}'
-
+    curl --location --request POST 'http://localhost:5000/api/auth/signin' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+    "usernameOrEmail":"l00pinfinity",
+    "password":"qwerty6"
+    }'
 ### Response
 
     {
-        "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJja2IiLCJpYXQiOjE2NzAyNDc1OTksImV4cCI6MTY3MDI0NzY4NX0.CwuhFGhu0S15q5xpXWHfFqj836fXh2W3z1r6RpmcPlEswe50XcfXVg9iLW6F_QDRnnyzxFNJdAoMnWKDmTrq7g",
-        "tokenType": "Bearer",
-        "expiresIn": 86400
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjc0MDMzODU0LCJleHAiOjE2NzQwMzc0NTR9.wyeppy7ZP5rANC0FxGDG9WopmfWFhy8xzt2wqiIOoVEJFlhU4nDr7Qabswoi845mNvRhIVFaBxm1y12d1Id0Nw",
+    "tokenType": "Bearer"
     }
 
 ## Forgot password
 
 ### Request
 
-`POST /api/forgot-password?email=test@gmail.com`
-
-    curl --location --request POST 'http://localhost:8080/api/forgot-password?email=test@gmail.com' \--data-raw ''
 
 Reset token is sent to the user via provided email if it exists.
 
 ### Successful Response
 
-    {
-        "success": true,
-        "message": "We have sent a password reset token to test@gmail.com"
-    }
 
 ### Failed Response
 1. No account with the Email Address
-```yaml
-{
-    "success": false,
-    "message": "There is no account with an email address"
-}
-```
 
 ## Reset password
 
 ### Request
 
-`POST /api/reset?token=c52d4ed8-f4a2-41de-90ca-f97bc4a56e37`
-
-    curl --location --request POST 'http://localhost:8080/api/reset?token=c52d4ed8-f4a2-41de-90ca-f97bc4a56e37' \--header 'Content-Type: application/json' \--data-raw '{"password":"qwerty"}'
 
 ### Successful Response
 
-    {
-        "success": true,
-        "message": "Your password has been successfully reset."
-    }
-
 ### Failed Response
 1. Invalid token
-```yaml
-{
-  "success": false,
-  "message": "The password reset link is invalid."
-}
-```
+
 
 ## Get User by Username
 
@@ -117,31 +109,28 @@ Reset token is sent to the user via provided email if it exists.
 
 `POST /api/users/in/{username}`
 
-    curl --location --request GET 'http://localhost:8080/api/users/in/{username}'
+    curl --location --request GET 'http://localhost:5000/api/users/l00pinfinity'
 
 ### Successful Response
 
     {
-        "success": true,
-        "message": "User with username available",
-        "data": {
-            "id": 1,
-            "email": "test@gmail.com",
-            "username": "ckb",
-            "roles": [
-                {
-                "id": 1,
-                "name": "ROLE_USER"
-                }
-            ]
-        }
+    "id": 1,
+    "username": "l00pinfinity",
+    "joinedAt": "2023-01-18T09:21:32Z",
+    "email": "collinskipkemboi@gmail.com",
+    "tweetCount": 0
     }
 
 ### Failed Response
 1. No user with username provided
+
 ```yaml
-{
-  "success": false,
-  "message": "No account with username provided"
-}
+    {
+       "timestamp": "2023-01-18T09:25:59.689+00:00",
+       "status": 404,
+       "error": "Not Found",
+       "trace": "com.boitdroid.birdapp.exception.ResourceNotFoundException: User with username: l00pinfinitys is not found\r\n\tat com.boitdroid.birdapp.repository",
+       "message": "User with username: l00pinfinitys is not found",
+       "path": "/api/users/l00pinfinitys"
+    }
 ```
