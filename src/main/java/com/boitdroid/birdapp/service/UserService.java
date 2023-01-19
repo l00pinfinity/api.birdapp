@@ -9,6 +9,8 @@ import com.boitdroid.birdapp.payload.response.UserProfile;
 import com.boitdroid.birdapp.payload.response.UserSummary;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public interface UserService {
 
@@ -31,5 +33,11 @@ public interface UserService {
     ApiResponse removeAdmin(String username);
 
     UserProfile setOrUpdateInfo(UserPrincipal currentUser, InfoRequest infoRequest);
+
+    Optional<User> findByResetToken(String resetToken);
+
+    Optional<User> findByEmail(String email);
+
+    void saveUser(User user);
 
 }

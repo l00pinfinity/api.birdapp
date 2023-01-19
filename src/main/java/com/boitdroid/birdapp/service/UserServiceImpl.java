@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -140,5 +141,20 @@ public class UserServiceImpl implements UserService{
             return new UserProfile(updatedUser.getId(),updatedUser.getUsername(),updatedUser.getCreatedAt(),updatedUser.getEmail(),postCount);
         }
         throw new AccessDeniedException("You don't have permission to update users profile");
+    }
+
+    @Override
+    public Optional<User> findByResetToken(String resetToken) {
+        return userRepository.findByResetToken(resetToken);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 }

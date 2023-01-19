@@ -27,7 +27,7 @@ import javax.validation.Valid;
 @RequestMapping("/api/tweets/{tweetId}/comments")
 public class CommentController {
     @Autowired
-    CommentService commentService;
+    private CommentService commentService;
 
     @GetMapping
     public ResponseEntity<PagedResponse<Comment>> getAllComments(@PathVariable(name = "tweetId") Long tweetId,

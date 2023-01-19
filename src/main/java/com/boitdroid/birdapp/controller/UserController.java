@@ -1,6 +1,8 @@
 package com.boitdroid.birdapp.controller;
 
+import com.boitdroid.birdapp.exception.AppException;
 import com.boitdroid.birdapp.model.user.User;
+import com.boitdroid.birdapp.payload.request.ForgotPasswordRequest;
 import com.boitdroid.birdapp.payload.request.InfoRequest;
 import com.boitdroid.birdapp.payload.request.UserIdentityAvailability;
 import com.boitdroid.birdapp.payload.response.ApiResponse;
@@ -13,16 +15,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -102,5 +107,4 @@ public class UserController {
 
         return new ResponseEntity(userProfile, HttpStatus.OK);
     }
-
 }
