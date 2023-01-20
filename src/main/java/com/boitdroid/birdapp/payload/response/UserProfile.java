@@ -12,9 +12,9 @@ import java.time.Instant;
 public class UserProfile {
 
     private Long id;
+    private String name;
     private String username;
     private Instant joinedAt;
-    private String email;
     private Long tweetCount;
 
 }

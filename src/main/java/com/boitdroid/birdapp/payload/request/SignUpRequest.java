@@ -14,11 +14,14 @@ public class SignUpRequest {
     private String username;
 
     @NotBlank
+    private String name;
+
+    @NotBlank
     @Size(max = 40)
     @Email
     private String email;
 
     @NotBlank
-    @Size(min = 6, max = 20)
+    @Size(min = 6, max = 100)
     private String password;
 }

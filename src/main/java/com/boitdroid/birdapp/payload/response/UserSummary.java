@@ -8,5 +8,8 @@ import lombok.Data;
 public class UserSummary {
 
     private Long id;
-    private String lastName;
+    private String name;
+    private String username;
+    private String email;
+    private Boolean isEnabled;
 }

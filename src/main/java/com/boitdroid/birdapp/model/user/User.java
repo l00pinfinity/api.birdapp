@@ -34,6 +34,9 @@ public class User extends DateAudit implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "name")
+    private String name;
+
     @NotBlank
     @Column(name = "username")
     @Size(max = 40)
@@ -68,7 +71,8 @@ public class User extends DateAudit implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
-    public User(String username, String email, String password) {
+    public User(String name, String username, String email, String password) {
+        this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;

@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserSummary getCurrentUser(UserPrincipal currentUser) {
-        return new UserSummary(currentUser.getId(), currentUser.getUsername());
+        return new UserSummary(currentUser.getId(),currentUser.getName(), currentUser.getUsername(),currentUser.getEmail(),currentUser.isEnabled());
     }
 
     @Override
@@ -78,8 +78,8 @@ public class UserServiceImpl implements UserService{
 
         Long postCount = tweetRepository.countByCreatedBy(user.getId());
 
-        return new UserProfile(user.getId(), user.getUsername(),
-                user.getCreatedAt(), user.getEmail(),postCount);
+        return new UserProfile(user.getId(),user.getName(), user.getUsername(),
+                user.getCreatedAt(),postCount);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class UserServiceImpl implements UserService{
 
             Long postCount = tweetRepository.countByCreatedBy(updatedUser.getId());
 
-            return new UserProfile(updatedUser.getId(),updatedUser.getUsername(),updatedUser.getCreatedAt(),updatedUser.getEmail(),postCount);
+            return new UserProfile(updatedUser.getId(),updatedUser.getName(),updatedUser.getUsername(),updatedUser.getCreatedAt(),postCount);
         }
         throw new AccessDeniedException("You don't have permission to update users profile");
     }
