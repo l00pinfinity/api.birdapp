@@ -83,25 +83,51 @@ Below are the REST APIs for the example app.
 
 ### Request
 
+`POST /api/auth/forgot-password?email=test@gmail.com`
+
+    curl --location --request POST 'http://localhost:8080/api/auth/forgot-password?email=test@gmail.com' \--data-raw ''
 
 Reset token is sent to the user via provided email if it exists.
 
 ### Successful Response
 
+    {
+        "success": true,
+        "message": "We have sent a password reset token to test@gmail.com"
+    }
 
 ### Failed Response
 1. No account with the Email Address
+```yaml
+{
+    "success": false,
+    "message": "There is no account with an email address"
+}
+```
 
 ## Reset password
 
 ### Request
 
+`POST /api/auth/reset?token=2FHKJW`
+
+    curl --location --request POST 'http://localhost:8080/api/reset?token=2FHKJW' \--header 'Content-Type: application/json' \--data-raw '{"password":"qwerty"}'
 
 ### Successful Response
 
+    {
+        "success": true,
+        "message": "Your password has been successfully reset."
+    }
+
 ### Failed Response
 1. Invalid token
-
+```yaml
+{
+  "success": false,
+  "message": "The password reset link is invalid."
+}
+```
 
 ## Get User by Username
 
@@ -134,3 +160,5 @@ Reset token is sent to the user via provided email if it exists.
        "path": "/api/users/l00pinfinitys"
     }
 ```
+
+

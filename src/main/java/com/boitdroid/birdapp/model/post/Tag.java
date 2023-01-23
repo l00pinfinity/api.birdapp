@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "tags")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Tag extends UserAudit {
+public class Hashtag extends UserAudit {
 
     private static final long serialVersionUID = -5298707266367331514L;
 
@@ -30,12 +30,15 @@ public class Tag extends UserAudit {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "count")
+    private int count;
+
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "tweet_tag", joinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tweet_id", referencedColumnName = "id"))
+    @JoinTable(name = "tweet_hashtag", joinColumns = @JoinColumn(name = "hashtag_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tweet_id", referencedColumnName = "id"))
     private List<Tweet> tweets;
 
-    public Tag(String name) {
+    public Hashtag(String name) {
         super();
         this.name = name;
     }
