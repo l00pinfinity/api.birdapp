@@ -107,6 +107,10 @@ public class TweetServiceImpl implements TweetService {
                 Tag tag = new Tag(hashtag);
                 tagRepository.save(tag);
                 tags.add(tag);
+            }else{
+                Tag tag = existingTag.get();
+                tag.setCount(tag.getCount() + 1);
+                tagRepository.save(tag);
             }
         }
 

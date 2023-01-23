@@ -23,6 +23,9 @@ public class Tag extends UserAudit {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "count")
+    private int count;
+
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tweet_tag", joinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tweet_id", referencedColumnName = "id"))
@@ -35,9 +38,10 @@ public class Tag extends UserAudit {
         this.name = name;
     }
 
-    public Tag(Long id, String name, List<Tweet> tweets) {
+    public Tag(Long id, String name, int count, List<Tweet> tweets) {
         this.id = id;
         this.name = name;
+        this.count = count;
         this.tweets = tweets;
     }
 
@@ -55,6 +59,14 @@ public class Tag extends UserAudit {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public List<Tweet> getTweets() {
