@@ -1,13 +1,8 @@
 package com.boitdroid.birdapp.payload.request;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-@Getter
-@Setter
 public class ForgotPasswordRequest {
 
     @NotNull(message = "Password cannot be null")
@@ -17,4 +12,20 @@ public class ForgotPasswordRequest {
     @NotNull(message = "Reset token cannot be null")
     @NotEmpty(message = "Reset token cannot be empty")
     private String resetToken;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
 }

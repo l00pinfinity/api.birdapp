@@ -12,7 +12,7 @@ public interface TweetService {
 
     PagedResponse<Tweet> getAllPosts(int page, int size);
     PagedResponse<Tweet> getPostsByCreatedBy(String username, int page, int size);
-    PagedResponse<Tweet> getPostsByTag(Long id, int page, int size);
+    PagedResponse<Tweet> getPostsByTag(String tag, int page, int size);
     ApiResponse updatePost(Long id, TweetRequest tweetRequest, UserPrincipal userPrincipal);
     ApiResponse deletePost(Long id,UserPrincipal userPrincipal);
     ApiResponse addPost(TweetRequest tweetRequest, UserPrincipal userPrincipal);

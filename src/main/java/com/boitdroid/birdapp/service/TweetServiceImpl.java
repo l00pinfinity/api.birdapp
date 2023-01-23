@@ -22,9 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TweetServiceImpl implements TweetService {
@@ -62,9 +60,9 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public PagedResponse<Tweet> getPostsByTag(Long id, int page, int size) {
+    public PagedResponse<Tweet> getPostsByTag(String tagName, int page, int size) {
         AppUtils.validatePageNumberAndSize(page, size);
-        Tag tag = tagRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tag with id not found"));
+        Tag tag = tagRepository.findByName(tagName);
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC,"createdAt");
         Page<Tweet> posts = tweetRepository.findByTags(Collections.singletonList(tag), pageable);
 
@@ -96,33 +94,38 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ApiResponse addPost(TweetRequest tweetRequest, UserPrincipal userPrincipal) {
-        User user = userRepository.findById(userPrincipal.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + userPrincipal.getId() + " not found"));
+    public ApiResponse addPost(TweetRequest tweetRequest, UserPrincipal currentUser) {
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + currentUser.getId() + " not found"));
 
-        List<Tag> tags = new ArrayList<>(tweetRequest.getTags().size());
+        List<String> hashtags = AppUtils.hashtagsInTweet(tweetRequest.getBody());
 
-        for (String name : tweetRequest.getTags()) {
-            Tag tag = tagRepository.findByName(name);
-            tag = tag == null ? tagRepository.save(new Tag(name)) : tag;
-
-            tags.add(tag);
+        List<Tag> tags = new ArrayList<>();
+        for (String hashtag : hashtags) {
+            Optional<Tag> existingTag = Optional.ofNullable(tagRepository.findByName(hashtag));
+            if(existingTag.isEmpty()){
+                Tag tag = new Tag(hashtag);
+                tagRepository.save(tag);
+                tags.add(tag);
+            }
         }
 
         Tweet tweet = new Tweet();
         tweet.setBody(tweetRequest.getBody());
         tweet.setUser(user);
         tweet.setTags(tags);
+        System.out.println(tweet);
 
-        Tweet newTweet = tweetRepository.save(tweet);
+        Tweet savedTweet = tweetRepository.save(tweet);
 
+        List<String> tagNames = new ArrayList<>(savedTweet.getTags().size());
 
-        List<String> tagNames = new ArrayList<>(newTweet.getTags().size());
-
-        for (Tag tag : newTweet.getTags()) {
+        for (Tag tag : savedTweet.getTags()) {
             tagNames.add(tag.getName());
         }
-        return new ApiResponse(Boolean.TRUE, "Post added successfully");
+
+        return new ApiResponse(true, "Tweet added successfully");
+
     }
 
     @Override

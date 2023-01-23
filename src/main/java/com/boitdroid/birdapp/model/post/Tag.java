@@ -4,54 +4,77 @@ import com.boitdroid.birdapp.model.audit.UserAudit;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
-@NoArgsConstructor
 @Table(name = "tags")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Hashtag extends UserAudit {
+public class Tag extends UserAudit {
 
     private static final long serialVersionUID = -5298707266367331514L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "count")
-    private int count;
-
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "tweet_hashtag", joinColumns = @JoinColumn(name = "hashtag_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tweet_id", referencedColumnName = "id"))
+    @JoinTable(name = "tweet_tag", joinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tweet_id", referencedColumnName = "id"))
     private List<Tweet> tweets;
 
-    public Hashtag(String name) {
-        super();
+    public Tag() {
+    }
+
+    public Tag(String name) {
+        this.name = name;
+    }
+
+    public Tag(Long id, String name, List<Tweet> tweets) {
+        this.id = id;
+        this.name = name;
+        this.tweets = tweets;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
         this.name = name;
     }
 
     public List<Tweet> getTweets() {
-        return tweets == null ? null : new ArrayList<>(tweets);
+        return tweets;
     }
 
     public void setTweets(List<Tweet> tweets) {
-        if (tweets == null) {
-            this.tweets = null;
-        } else {
-            this.tweets = Collections.unmodifiableList(tweets);
-        }
+        this.tweets = tweets;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tag tag = (Tag) o;
+        return Objects.equals(id, tag.id) && Objects.equals(name, tag.name) && Objects.equals(tweets, tag.tweets);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, tweets);
     }
 }

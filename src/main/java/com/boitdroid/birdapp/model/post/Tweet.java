@@ -5,20 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.boitdroid.birdapp.model.audit.UserAudit;
 import com.boitdroid.birdapp.model.user.User;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
 @Table(name = "tweets")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Tweet extends UserAudit {
+public class Tweet extends UserAudit implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,7 +22,7 @@ public class Tweet extends UserAudit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "body")
+    @Column(name = "body", length = 65555)
     private String body;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,7 +37,39 @@ public class Tweet extends UserAudit {
     @JoinTable(name = "tweet_tag", joinColumns = @JoinColumn(name = "tweet_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
     private List<Tag> tags;
 
-    @JsonIgnore
+    public Tweet() {
+    }
+
+    public Tweet(String body, User user, List<Tag> tags) {
+        this.body = body;
+        this.user = user;
+        this.tags = tags;
+    }
+
+    public Tweet(Long id, String body, User user, List<Comment> comments, List<Tag> tags) {
+        this.id = id;
+        this.body = body;
+        this.user = user;
+        this.comments = comments;
+        this.tags = tags;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
     public User getUser() {
         return user;
     }
@@ -51,26 +79,31 @@ public class Tweet extends UserAudit {
     }
 
     public List<Comment> getComments() {
-        return comments == null ? null : new ArrayList<>(comments);
+        return comments;
     }
 
     public void setComments(List<Comment> comments) {
-        if (comments == null) {
-            this.comments = null;
-        } else {
-            this.comments = Collections.unmodifiableList(comments);
-        }
+        this.comments = comments;
     }
 
     public List<Tag> getTags() {
-        return tags == null ? null : new ArrayList<>(tags);
+        return tags;
     }
 
     public void setTags(List<Tag> tags) {
-        if (tags == null) {
-            this.tags = null;
-        } else {
-            this.tags = Collections.unmodifiableList(tags);
-        }
+        this.tags = tags;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tweet tweet = (Tweet) o;
+        return Objects.equals(id, tweet.id) && Objects.equals(body, tweet.body) && Objects.equals(user, tweet.user) && Objects.equals(comments, tweet.comments) && Objects.equals(tags, tweet.tags);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, body, user, comments, tags);
     }
 }

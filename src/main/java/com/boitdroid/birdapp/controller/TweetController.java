@@ -25,7 +25,7 @@ public class TweetController {
     @GetMapping
     public ResponseEntity<PagedResponse<Tweet>> getAllPosts(
             @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-            @RequestParam(value = "size", required = false, defaultValue = "30") Integer size) {
+            @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
         PagedResponse<Tweet> response = tweetService.getAllPosts(page, size);
 
         return new ResponseEntity(response, HttpStatus.OK);
@@ -33,12 +33,12 @@ public class TweetController {
 
     // TODO: 1/16/2023 Add PostsByPlatform 
 
-    @GetMapping("/tag/{id}")
+    @GetMapping("/tag/{name}")
     public ResponseEntity<PagedResponse<Tweet>> getPostsByTag(
             @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "size", required = false, defaultValue = "30") Integer size,
-            @PathVariable(name = "id") Long id) {
-        PagedResponse<Tweet> response = tweetService.getPostsByTag(id, page, size);
+            @RequestParam(name = "name") String tag) {
+        PagedResponse<Tweet> response = tweetService.getPostsByTag(tag, page, size);
 
         return new ResponseEntity(response, HttpStatus.OK);
     }
@@ -59,7 +59,7 @@ public class TweetController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<Tweet> updatePost(@PathVariable(name = "id") Long id,
                                             @Valid @RequestBody TweetRequest newTweetRequest, @CurrentUser UserPrincipal currentUser) {
         ApiResponse apiResponse = tweetService.updatePost(id, newTweetRequest, currentUser);

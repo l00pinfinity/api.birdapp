@@ -2,6 +2,8 @@ package com.boitdroid.birdapp.utils;
 
 import com.boitdroid.birdapp.exception.AppException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class AppUtils {
@@ -35,4 +37,17 @@ public class AppUtils {
         }
         return stringBuilder.toString();
     }
+
+    public static List<String> hashtagsInTweet(String tweet) {
+        List<String> hashtags = new ArrayList<>();
+        String[] words = tweet.split(" ");
+        for (String word : words) {
+            if (word.startsWith("#")) {
+                String hashtag = word.substring(1);
+                hashtags.add(hashtag);
+            }
+        }
+        return hashtags;
+    }
+
 }

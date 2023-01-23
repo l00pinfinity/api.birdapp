@@ -27,13 +27,13 @@ import org.springframework.stereotype.Service;
 public class CommentServiceImpl implements CommentService{
 
     @Autowired
-    CommentRepository commentRepository;
+    private CommentRepository commentRepository;
 
     @Autowired
-    TweetRepository tweetRepository;
+    private TweetRepository tweetRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Override
     public PagedResponse<Comment> getAllComments(Long tweetId, int page, int size) {
